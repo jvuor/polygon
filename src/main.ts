@@ -55,7 +55,7 @@ function animationState(n: number, direction: 1 | -1): void {
     direction = -1;
   }
 
-  let time = n === nmin ? 1000 : 20;
+  let time = n === nmin ? 1000 : 50;
 
   animationTimer = setTimeout(() => animationState(n, direction), time);
 }
@@ -64,10 +64,11 @@ function draw(n: number) {
   ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
   const circleRadius = perimeterSize / (2 * Math.PI);
+  const circlePositition = normalizeToScreen({ x: 0, y: 0 });
   ctx.beginPath();
   ctx.strokeStyle = 'rgba(214, 206, 210, 0.7)';
-  ctx.lineWidth = 1;
-  ctx.arc(LOGICAL_WIDTH / 2, LOGICAL_HEIGHT / 2, circleRadius, 0, 2 * Math.PI);
+  ctx.lineWidth = 3;
+  ctx.arc(circlePositition.x, circlePositition.y, circleRadius, 0, 2 * Math.PI);
   ctx.stroke();
 
   const points = Array(n)
@@ -77,8 +78,12 @@ function draw(n: number) {
   ctx.beginPath();
   ctx.strokeStyle = 'black';
   ctx.moveTo(points[0].x, points[0].y);
-  points.forEach(p => ctx.lineTo(p.x, p.y));
-  ctx.lineTo(points[0].x, points[0].y);
+  for (let i = 0; i < points.length + 2; i++) {
+    // this needs to overflow to make the line look whole, so the sequence is:
+    // 0, 1, 2 ... n, 0, 1
+    const point = points[i % points.length];
+    ctx.lineTo(point.x, point.y);
+  }
   ctx.stroke();
 }
 
